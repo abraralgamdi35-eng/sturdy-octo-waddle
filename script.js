@@ -80,9 +80,18 @@ async function sendMessage() {
     userInput.focus();
 }
 
-if (showLoginBtn) showLoginBtn.onclick = function() { loginModal.classList.add('show'); };
-if (closeModal) closeModal.onclick = function() { loginModal.classList.remove('show'); };
-if (googleLoginBtn) googleLoginBtn.onclick = function() {
+sendBtn.onclick = sendMessage;
+newChatBtn.onclick = function() { chatMessages.innerHTML = ''; newChat(); };
+userInput.onkeydown = function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+    }
+};
+
+showLoginBtn.onclick = function() { loginModal.classList.add('show'); };
+closeModal.onclick = function() { loginModal.classList.remove('show'); };
+googleLoginBtn.onclick = function() {
     var name = prompt('Enter your name:');
     var email = prompt('Enter your Gmail:');
     if (email && name) {
@@ -90,16 +99,13 @@ if (googleLoginBtn) googleLoginBtn.onclick = function() {
         loginUser(email, name);
     }
 };
-if (loginBtn) loginBtn.onclick = function() {
+loginBtn.onclick = function() {
     var email = emailInput.value.trim();
     if (!email) return;
     loginUser(email);
 };
-if (signupBtn) signupBtn.onclick = function() {
+signupBtn.onclick = function() {
     var email = emailInput.value.trim();
     if (!email) return;
     loginUser(email);
 };
-if (sendBtn) sendBtn.onclick = sendMessage;
-if (newChatBtn) newChatBtn.onclick = function() { chatMessages.innerHTML = ''; newChat(); };
-if (userInput) userInput.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } };
