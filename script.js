@@ -20,16 +20,13 @@ var currentChatId = '';
 var currentUser = null;
 var savedChats = {};
 
-function checkLogin() {
-    var user = localStorage.getItem('myAiUser');
-    if (user) {
-        currentUser = JSON.parse(user);
-        loginOverlay.classList.add('hidden');
-        userName.textContent = currentUser.name || currentUser.email.split('@')[0];
-        userAvatar.textContent = (currentUser.name || currentUser.email).charAt(0).toUpperCase();
-        loadChats();
-        newChat();
-    }
+var user = localStorage.getItem('myAiUser');
+if (user) {
+    currentUser = JSON.parse(user);
+    loginOverlay.classList.add('hidden');
+    userName.textContent = currentUser.name || currentUser.email.split('@')[0];
+    userAvatar.textContent = (currentUser.name || currentUser.email).charAt(0).toUpperCase();
+    newChat();
 }
 
 function loginUser(email, name) {
@@ -38,7 +35,6 @@ function loginUser(email, name) {
     loginOverlay.classList.add('hidden');
     userName.textContent = currentUser.name;
     userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
-    loadChats();
     newChat();
 }
 
@@ -51,88 +47,45 @@ googleLoginBtn.onclick = function() {
     }
 };
 
-signupBtn.onclick = async function() {
+signupBtn.onclick = function() {
     var email = emailInput.value.trim();
     var password = passwordInput.value.trim();
-    if (!email || !password) return alert('Fill all fields');
-    try {
-        var res = await fetch(BASE_URL + '/api/signup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email, password: password })
-        });
-        var data = await res.json();
-        if (data.success) loginUser(email);
-        else alert(data.error);
-    } catch(e) { loginUser(email); }
+    if (!email || !password) { alert('Fill all fields'); return; }
+    loginUser(email);
 };
 
-loginBtn.onclick = async function() {
+loginBtn.onclick = function() {
     var email = emailInput.value.trim();
     var password = passwordInput.value.trim();
-    if (!email || !password) return alert('Fill all fields');
-    try {
-        var res = await fetch(BASE_URL + '/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email, password: password })
-        });
-        var data = await res.json();
-        if (data.success) loginUser(email);
-        else alert(data.error);
-    } catch(e) { loginUser(email); }
+    if (!email || !password) { alert('Fill all fields'); return; }
+    loginUser(email);
 };
 
 logoutBtn.onclick = function() {
     localStorage.removeItem('myAiUser');
-    currentUser = null;
-    chatMessages.innerHTML = '';
-    chatHistory.innerHTML = '';
-    welcomeScreen.classList.remove('hidden');
-    chatScreen.classList.remove('active');
-    loginOverlay.classList.remove('hidden');
+    location.reload();
 };
 
-function loadChats() {
-    var key = 'myChats_' + (currentUser ? currentUser.email : 'guest');
-    var saved = localStorage.getItem(key);
-    if (saved) {
-        savedChats = JSON.parse(saved);
-        Object.keys(savedChats).forEach(function(id) {
-            addHistoryItem(id, savedChats[id].title);
-        });
+function addMessageToScreen(text, sender) {
+    var row = document.createElement('div');
+    row.className = 'message-row ' + sender;
+    var bubble = document.createElement('div');
+    bubble.className = 'message-bubble';
+    bubble.textContent = text;
+    var label = document.createElement('div');
+    label.style.fontSize = '11px';
+    label.style.color = '#888';
+    label.style.marginBottom = '4px';
+    label.textContent = sender === 'user' ? (currentUser ? currentUser.name : 'You') : 'AI';
+    if (sender === 'user') {
+        row.style.justifyContent = 'flex-end';
+        row.append(bubble, label);
+    } else {
+        row.style.justifyContent = 'flex-start';
+        row.append(label, bubble);
     }
-}
-
-function saveChats() {
-    var key = 'myChats_' + (currentUser ? currentUser.email : 'guest');
-    localStorage.setItem(key, JSON.stringify(savedChats));
-}
-
-function addHistoryItem(id, title) {
-    var item = document.createElement('div');
-    item.className = 'history-item';
-    item.dataset.chatId = id;
-    item.textContent = title || 'New conversation';
-    item.onclick = function() { loadChat(id); };
-    chatHistory.insertBefore(item, chatHistory.firstChild);
-}
-
-async function loadChat(id) {
-    currentChatId = id;
-    chatMessages.innerHTML = '';
-    try {
-        var res = await fetch(BASE_URL + '/api/chat/' + id);
-        var data = await res.json();
-        data.messages.forEach(function(msg) {
-            addMessageToScreen(msg.content, msg.role === 'user' ? 'user' : 'bot');
-        });
-    } catch(e) {}
-    welcomeScreen.classList.add('hidden');
-    chatScreen.classList.add('active');
-    document.querySelectorAll('.history-item').forEach(function(el) {
-        el.classList.toggle('active', el.dataset.chatId === id);
-    });
+    chatMessages.appendChild(row);
+    chatScreen.scrollTop = chatScreen.scrollHeight;
 }
 
 async function newChat() {
@@ -140,27 +93,10 @@ async function newChat() {
         var res = await fetch(BASE_URL + '/api/new-chat', { method: 'POST' });
         var data = await res.json();
         currentChatId = data.chat_id;
-        savedChats[data.chat_id] = { title: 'New conversation' };
-        saveChats();
-        addHistoryItem(data.chat_id, 'New conversation');
-        chatMessages.innerHTML = '';
         welcomeScreen.classList.remove('hidden');
         chatScreen.classList.remove('active');
+        chatMessages.innerHTML = '';
     } catch(e) {}
-}
-
-function addMessageToScreen(text, sender) {
-    var row = document.createElement('div');
-    row.className = 'message-row ' + sender;
-    var avatar = document.createElement('div');
-    avatar.className = 'avatar ' + (sender === 'user' ? 'user-avatar' : 'bot-avatar');
-    avatar.textContent = sender === 'user' ? (currentUser ? currentUser.name.charAt(0).toUpperCase() : 'U') : 'T';
-    var bubble = document.createElement('div');
-    bubble.className = 'message-bubble';
-    bubble.textContent = text;
-    sender === 'user' ? row.append(bubble, avatar) : row.append(avatar, bubble);
-    chatMessages.appendChild(row);
-    chatScreen.scrollTop = chatScreen.scrollHeight;
 }
 
 async function sendMessage() {
@@ -180,13 +116,8 @@ async function sendMessage() {
         });
         var data = await res.json();
         addMessageToScreen(data.reply, 'bot');
-        savedChats[currentChatId].title = text.substring(0, 30);
-        saveChats();
-        document.querySelectorAll('.history-item').forEach(function(el) {
-            if (el.dataset.chatId === currentChatId) el.textContent = text.substring(0, 30);
-        });
     } catch(e) {
-        addMessageToScreen('Error: Server not running!', 'bot');
+        addMessageToScreen('Error: Could not reach server', 'bot');
     }
     sendBtn.disabled = false;
     userInput.focus();
@@ -197,5 +128,3 @@ newChatBtn.onclick = newChat;
 userInput.onkeydown = function(e) {
     if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
 };
-
-checkLogin();
