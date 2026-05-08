@@ -1,0 +1,8 @@
+{
+  "name": "turki-ai",
+  "version": "1.0.0",
+  "description": "AI by Turki age 10",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
