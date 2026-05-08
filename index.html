@@ -3,40 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>my ai baby</title>
+    <title>My AI - Made by Turki</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="beta-banner">BETA - Made by Turki, age 10 - Still learning!</div>
+
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <h2>Welcome</h2>
+            <p class="made-by">Made by Turki</p>
+            <button class="google-btn" id="googleLoginBtn">Sign in with Google</button>
+            <div class="divider"><span>or</span></div>
+            <input type="email" id="emailInput" placeholder="Email address" class="login-input">
+            <input type="password" id="passwordInput" placeholder="Password" class="login-input">
+            <button class="email-btn" id="loginBtn">Log in</button>
+            <button class="email-btn signup-btn" id="signupBtn">Sign up</button>
+        </div>
+    </div>
+
     <div class="sidebar">
         <div class="sidebar-header">
             <button class="new-chat-btn" id="newChatBtn">+ New chat</button>
         </div>
-        <div class="chat-history" id="chatHistory">
-            <div class="history-item active">New conversation</div>
-        </div>
+        <div class="chat-history" id="chatHistory"></div>
         <div class="sidebar-bottom">
-            <p style="font-size:11px; color:#888; padding:8px;">Powered by Ollama</p>
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">T</div>
+                <span id="userName">Turki</span>
+            </div>
+            <button class="logout-btn" id="logoutBtn">Log out</button>
+            <p class="made-by-side">Made by Turki</p>
         </div>
     </div>
 
     <div class="main">
         <div class="welcome-screen" id="welcomeScreen">
             <h1 class="welcome-title">I'm ready when you are.</h1>
+            <p class="made-by-main">Made by Turki</p>
         </div>
-
         <div class="chat-screen" id="chatScreen">
             <div class="chat-messages" id="chatMessages"></div>
         </div>
-
         <div class="input-container">
             <div class="input-wrapper">
                 <input type="text" id="userInput" placeholder="Message my AI..." autocomplete="off" class="chat-input">
-                <button class="send-btn" id="sendBtn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 2L11 13"></path>
-                        <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
-                    </svg>
-                </button>
+                <button class="send-btn" id="sendBtn">Send</button>
             </div>
             <p class="disclaimer">My AI can make mistakes. Check important info.</p>
         </div>
