@@ -5,36 +5,38 @@ var userInput = document.getElementById('userInput');
 var sendBtn = document.getElementById('sendBtn');
 var newChatBtn = document.getElementById('newChatBtn');
 var chatHistory = document.getElementById('chatHistory');
-var loginOverlay = document.getElementById('loginOverlay');
+var loginModal = document.getElementById('loginModal');
+var showLoginBtn = document.getElementById('showLoginBtn');
+var closeModal = document.getElementById('closeModal');
 var googleLoginBtn = document.getElementById('googleLoginBtn');
 var loginBtn = document.getElementById('loginBtn');
 var signupBtn = document.getElementById('signupBtn');
-var logoutBtn = document.getElementById('logoutBtn');
 var emailInput = document.getElementById('emailInput');
 var passwordInput = document.getElementById('passwordInput');
-var userName = document.getElementById('userName');
-var userAvatar = document.getElementById('userAvatar');
 
 var BASE_URL = 'https://sturdy-octo-waddle-3.onrender.com';
 var currentChatId = '';
 var currentUser = null;
-var savedChats = {};
 
-var user = localStorage.getItem('myAiUser');
-if (user) {
-    currentUser = JSON.parse(user);
-    loginOverlay.classList.add('hidden');
-    userName.textContent = currentUser.name || currentUser.email.split('@')[0];
-    userAvatar.textContent = (currentUser.name || currentUser.email).charAt(0).toUpperCase();
-    newChat();
+var savedUser = localStorage.getItem('myAiUser');
+if (savedUser) {
+    currentUser = JSON.parse(savedUser);
+    showChat();
 }
+
+showLoginBtn.onclick = function() { loginModal.classList.add('show'); };
+closeModal.onclick = function() { loginModal.classList.remove('show'); };
 
 function loginUser(email, name) {
     currentUser = { email: email, name: name || email.split('@')[0] };
     localStorage.setItem('myAiUser', JSON.stringify(currentUser));
-    loginOverlay.classList.add('hidden');
-    userName.textContent = currentUser.name;
-    userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
+    loginModal.classList.remove('show');
+    showChat();
+}
+
+function showChat() {
+    welcomeScreen.classList.add('hidden');
+    chatScreen.classList.add('active');
     newChat();
 }
 
@@ -47,44 +49,31 @@ googleLoginBtn.onclick = function() {
     }
 };
 
-signupBtn.onclick = function() {
-    var email = emailInput.value.trim();
-    var password = passwordInput.value.trim();
-    if (!email || !password) { alert('Fill all fields'); return; }
-    loginUser(email);
-};
-
 loginBtn.onclick = function() {
     var email = emailInput.value.trim();
     var password = passwordInput.value.trim();
-    if (!email || !password) { alert('Fill all fields'); return; }
+    if (!email || !password) return;
     loginUser(email);
 };
 
-logoutBtn.onclick = function() {
-    localStorage.removeItem('myAiUser');
-    location.reload();
+signupBtn.onclick = function() {
+    var email = emailInput.value.trim();
+    var password = passwordInput.value.trim();
+    if (!email || !password) return;
+    loginUser(email);
 };
 
-function addMessageToScreen(text, sender) {
-    var row = document.createElement('div');
-    row.className = 'message-row ' + sender;
+function addMessage(text, sender) {
+    var div = document.createElement('div');
+    div.className = 'message ' + sender;
+    var avatar = document.createElement('div');
+    avatar.className = 'message-avatar';
+    avatar.textContent = sender === 'user' ? (currentUser ? currentUser.name.charAt(0).toUpperCase() : 'U') : 'AI';
     var bubble = document.createElement('div');
-    bubble.className = 'message-bubble';
+    bubble.className = 'message-text';
     bubble.textContent = text;
-    var label = document.createElement('div');
-    label.style.fontSize = '11px';
-    label.style.color = '#888';
-    label.style.marginBottom = '4px';
-    label.textContent = sender === 'user' ? (currentUser ? currentUser.name : 'You') : 'AI';
-    if (sender === 'user') {
-        row.style.justifyContent = 'flex-end';
-        row.append(bubble, label);
-    } else {
-        row.style.justifyContent = 'flex-start';
-        row.append(label, bubble);
-    }
-    chatMessages.appendChild(row);
+    sender === 'user' ? div.append(bubble, avatar) : div.append(avatar, bubble);
+    chatMessages.appendChild(div);
     chatScreen.scrollTop = chatScreen.scrollHeight;
 }
 
@@ -93,19 +82,13 @@ async function newChat() {
         var res = await fetch(BASE_URL + '/api/new-chat', { method: 'POST' });
         var data = await res.json();
         currentChatId = data.chat_id;
-        welcomeScreen.classList.remove('hidden');
-        chatScreen.classList.remove('active');
-        chatMessages.innerHTML = '';
     } catch(e) {}
 }
 
 async function sendMessage() {
     var text = userInput.value.trim();
     if (!text || !currentUser) return;
-    if (!currentChatId) await newChat();
-    welcomeScreen.classList.add('hidden');
-    chatScreen.classList.add('active');
-    addMessageToScreen(text, 'user');
+    addMessage(text, 'user');
     userInput.value = '';
     sendBtn.disabled = true;
     try {
@@ -115,16 +98,14 @@ async function sendMessage() {
             body: JSON.stringify({ message: text })
         });
         var data = await res.json();
-        addMessageToScreen(data.reply, 'bot');
+        addMessage(data.reply, 'bot');
     } catch(e) {
-        addMessageToScreen('Error: Could not reach server', 'bot');
+        addMessage('Error connecting to server', 'bot');
     }
     sendBtn.disabled = false;
     userInput.focus();
 }
 
 sendBtn.onclick = sendMessage;
-newChatBtn.onclick = newChat;
-userInput.onkeydown = function(e) {
-    if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
-};
+newChatBtn.onclick = function() { chatMessages.innerHTML = ''; newChat(); };
+userInput.onkeydown = function(e) { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } };
