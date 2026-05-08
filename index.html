@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>my ai baby</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <button class="new-chat-btn" id="newChatBtn">+ New chat</button>
+        </div>
+        <div class="chat-history" id="chatHistory">
+            <div class="history-item active">New conversation</div>
+        </div>
+        <div class="sidebar-bottom">
+            <p style="font-size:11px; color:#888; padding:8px;">Powered by Ollama</p>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="welcome-screen" id="welcomeScreen">
+            <h1 class="welcome-title">I'm ready when you are.</h1>
+        </div>
+
+        <div class="chat-screen" id="chatScreen">
+            <div class="chat-messages" id="chatMessages"></div>
+        </div>
+
+        <div class="input-container">
+            <div class="input-wrapper">
+                <input type="text" id="userInput" placeholder="Message my AI..." autocomplete="off" class="chat-input">
+                <button class="send-btn" id="sendBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13"></path>
+                        <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+                    </svg>
+                </button>
+            </div>
+            <p class="disclaimer">My AI can make mistakes. Check important info.</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
