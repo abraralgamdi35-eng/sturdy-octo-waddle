@@ -14,6 +14,8 @@ var emailInput = document.getElementById('emailInput');
 var BASE_URL = 'https://sturdy-octo-waddle-3.onrender.com';
 var currentChatId = '';
 var currentUser = null;
+var guestMessages = 0;
+var MAX_GUEST_MESSAGES = 3;
 
 var saved = localStorage.getItem('turkiUser');
 if (saved) {
@@ -31,7 +33,9 @@ function login(email, name) {
     currentUser = { email: email, name: name || email.split('@')[0] };
     localStorage.setItem('turkiUser', JSON.stringify(currentUser));
     loginBox.style.display = 'none';
+    guestMessages = 0;
     showApp();
+    addMsg('Welcome ' + currentUser.name + '! You now have unlimited messages! 🎉', 'bot');
 }
 
 loginBtn.onclick = function() { loginBox.style.display = 'flex'; };
@@ -69,9 +73,26 @@ async function newChat() {
 
 async function sendMsg() {
     var text = userInput.value.trim();
-    if (!text || !currentUser) return;
+    if (!text) return;
+    
+    if (!currentUser) {
+        guestMessages++;
+        if (guestMessages > MAX_GUEST_MESSAGES) {
+            addMsg('You have used all ' + MAX_GUEST_MESSAGES + ' free messages! Please log in or sign up to continue chatting. 🙏', 'bot');
+            addMsg('Click the Log in button below to get unlimited messages!', 'bot');
+            userInput.value = '';
+            userInput.disabled = true;
+            sendBtn.disabled = true;
+            return;
+        }
+        if (guestMessages === MAX_GUEST_MESSAGES) {
+            addMsg('⚠️ This is your last free message! Log in or sign up for unlimited chats!', 'bot');
+        }
+    }
+    
     addMsg(text, 'user');
     userInput.value = '';
+    
     try {
         var r = await fetch(BASE_URL + '/api/chat/' + currentChatId, {
             method: 'POST',
@@ -86,5 +107,18 @@ async function sendMsg() {
 }
 
 sendBtn.onclick = sendMsg;
-newChatBtn.onclick = function() { chatMessages.innerHTML = ''; newChat(); };
+newChatBtn.onclick = function() { 
+    chatMessages.innerHTML = ''; 
+    newChat();
+    if (!currentUser) {
+        guestMessages = 0;
+        userInput.disabled = false;
+        sendBtn.disabled = false;
+        addMsg('You have ' + MAX_GUEST_MESSAGES + ' free messages. Log in for unlimited! 🔓', 'bot');
+    }
+};
 userInput.onkeydown = function(e) { if (e.key === 'Enter') sendMsg(); };
+
+if (!currentUser) {
+    addMsg('Welcome! You have ' + MAX_GUEST_MESSAGES + ' free messages. Log in for unlimited! 🔓', 'bot');
+}
