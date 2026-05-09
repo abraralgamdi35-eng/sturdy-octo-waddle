@@ -16,11 +16,7 @@ function generateId() {
 function serveFile(res, filePath, contentType) {
     var fullPath = path.join(__dirname, filePath);
     fs.readFile(fullPath, function(err, data) {
-        if (err) {
-            res.writeHead(404);
-            res.end('Not found');
-            return;
-        }
+        if (err) { res.writeHead(404); res.end('Not found'); return; }
         res.writeHead(200, { 'Content-Type': contentType });
         res.end(data);
     });
@@ -35,18 +31,14 @@ function parseBody(req, callback) {
     });
 }
 
-function aiResponse(userMessage) {
-    var msg = userMessage.toLowerCase();
-    if (msg.indexOf('who are you') !== -1) return 'I am TurkiAI! Made by Turki, a 10-year-old coding genius! Still in beta!';
-    if (msg.indexOf('who made you') !== -1) return 'I was made by Turki! He is only 10 years old and built me from scratch!';
-    if (msg.indexOf('turki') !== -1) return 'Turki is my creator! A 10-year-old prodigy who knows HTML, CSS, JavaScript and Node.js!';
-    if (msg.indexOf('hi') !== -1 || msg.indexOf('hello') !== -1 || msg.indexOf('hey') !== -1) {
-        var g = ['Hey there! TurkiAI here! Made by a 10-year-old!', 'Hello! Turki created me!', 'Hi! I am TurkiAI, still in beta!'];
-        return g[Math.floor(Math.random() * g.length)];
-    }
-    if (msg.indexOf('beta') !== -1) return 'Yes I am in beta! Turki is only 10 and still improving me!';
-    var r = ['Interesting!', 'Tell me more!', 'I see!', 'Good question!', 'Turki is working on making me smarter!'];
-    return r[Math.floor(Math.random() * r.length)];
+function aiResponse(msg) {
+    msg = msg.toLowerCase();
+    if (msg.indexOf('hi') !== -1||msg.indexOf('hello')!==-1||msg.indexOf('hey')!==-1) return 'Hey! I am TurkiAI! Made by Turki, a 10 year old coding genius!';
+    if (msg.indexOf('who made you')!==-1||msg.indexOf('who created you')!==-1) return 'I was made by Turki! He is 10 years old and built me from scratch!';
+    if (msg.indexOf('turki')!==-1) return 'Turki is my amazing creator! 10 years old, coding legend!';
+    if (msg.indexOf('beta')!==-1) return 'Yes I am in beta! Turki is still improving me!';
+    var res = ['Cool!','Tell me more!','Interesting!','I see!','Turki is teaching me!'];
+    return res[Math.floor(Math.random()*res.length)];
 }
 
 var server = http.createServer(function(req, res) {
@@ -60,17 +52,16 @@ var server = http.createServer(function(req, res) {
     else if (req.url === '/script.js') { serveFile(res, 'script.js', 'text/javascript'); }
     else if (req.url === '/api/new-chat' && req.method === 'POST') {
         var id = generateId();
-        chats[id] = { title: 'New conversation', messages: [] };
+        chats[id] = { messages: [] };
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ chat_id: id }));
     }
     else if (req.url.startsWith('/api/chat/') && req.method === 'POST') {
         var chatId = req.url.split('/api/chat/')[1];
-        if (!chats[chatId]) chats[chatId] = { title: 'New conversation', messages: [] };
+        if (!chats[chatId]) chats[chatId] = { messages: [] };
         parseBody(req, function(body) {
             var msg = body.message || 'hi';
             chats[chatId].messages.push({ role: 'user', content: msg });
-            if (chats[chatId].messages.length === 1) chats[chatId].title = msg.substring(0, 40);
             var reply = aiResponse(msg);
             chats[chatId].messages.push({ role: 'assistant', content: reply });
             res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -79,12 +70,10 @@ var server = http.createServer(function(req, res) {
     }
     else if (req.url.startsWith('/api/chat/') && req.method === 'GET') {
         var chatId = req.url.split('/api/chat/')[1];
-        if (!chats[chatId]) { res.writeHead(404); res.end(JSON.stringify({ error: 'Not found' })); }
+        if (!chats[chatId]) { res.writeHead(404); res.end('{}'); }
         else { res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(chats[chatId])); }
     }
     else { res.writeHead(404); res.end('Not found'); }
 });
 
-server.listen(PORT, function() {
-    console.log('TurkiAI running on port ' + PORT);
-});
+server.listen(PORT, function() { console.log('TurkiAI on ' + PORT); });
