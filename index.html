@@ -3,67 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TurkiAI - Made by Turki, Age 10</title>
-    <link rel="stylesheet" href="style.css">
+    <title>TurkiAI</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:Arial,sans-serif;background:#212121;color:#fff;display:flex;height:100vh}
+        .sidebar{width:260px;background:#171717;padding:10px;display:flex;flex-direction:column;gap:10px}
+        .new-chat-btn{width:100%;padding:10px;background:transparent;border:1px solid #444;color:#fff;border-radius:8px;cursor:pointer;font-size:14px}
+        .new-chat-btn:hover{background:#2c2c2c}
+        .search-input{width:100%;padding:8px 12px;background:#2f2f2f;border:1px solid #444;border-radius:6px;color:#fff;font-size:13px;outline:none}
+        .chat-history{flex:1;overflow-y:auto}
+        .history-item{padding:10px;color:#b4b4b4;font-size:13px;cursor:pointer;border-radius:6px}
+        .history-item:hover{background:#2c2c2c}
+        .main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+        .welcome{text-align:center}
+        .welcome h1{font-size:28px;margin-bottom:16px}
+        .welcome button{background:#fff;color:#000;border:none;padding:10px 24px;border-radius:8px;font-size:16px;cursor:pointer;font-weight:bold}
+        .welcome button:hover{background:#ddd}
+        .chat-area{display:none;flex:1;width:100%;max-width:768px;padding:20px;overflow-y:auto;flex-direction:column;gap:16px}
+        .message{display:flex;gap:8px}
+        .message.user{justify-content:flex-end}
+        .msg-bubble{padding:10px 14px;border-radius:12px;max-width:70%;font-size:15px;line-height:1.5}
+        .msg-bubble.user{background:#2f2f2f}
+        .input-area{width:100%;max-width:768px;padding:0 20px 16px}
+        .input-box{display:flex;gap:8px}
+        .input-box input{flex:1;padding:12px;background:#2f2f2f;border:1px solid #444;border-radius:12px;color:#fff;font-size:15px;outline:none}
+        .input-box button{padding:12px 20px;background:#fff;color:#000;border:none;border-radius:12px;font-weight:bold;cursor:pointer}
+        .input-box button:hover{background:#ddd}
+        .footer{text-align:center;font-size:11px;color:#888;margin-top:8px}
+        .login-box{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);align-items:center;justify-content:center;z-index:999}
+        .login-inner{background:#1a1a1a;padding:30px;border-radius:16px;width:350px;text-align:center}
+        .login-inner h2{margin-bottom:4px}
+        .login-inner p{font-size:12px;color:#888;margin-bottom:16px}
+        .login-inner input{width:100%;padding:10px;background:#2f2f2f;border:1px solid #444;border-radius:8px;color:#fff;margin-bottom:8px;outline:none}
+        .login-inner button{width:100%;padding:10px;background:#fff;color:#000;border:none;border-radius:8px;font-size:14px;cursor:pointer;margin-bottom:6px}
+        .login-inner .google-btn{background:#4285F4;color:#fff}
+    </style>
 </head>
 <body>
     <div class="sidebar">
-        <div class="sidebar-top">
-            <button class="new-chat-btn" id="newChatBtn">+ New chat</button>
-        </div>
-        <div class="sidebar-search">
-            <input type="text" placeholder="Searching chats" class="search-input">
-        </div>
-        <div class="chat-history" id="chatHistory">
-            <div class="history-item active">the pictures</div>
-            <div class="history-item">Applications</div>
-        </div>
-        <div class="sidebar-bottom">
-            <p class="detailed-search">Detailed search</p>
-        </div>
+        <button class="new-chat-btn" id="newChatBtn">+ New chat</button>
+        <input type="text" class="search-input" placeholder="Searching chats">
+        <div class="chat-history" id="chatHistory"></div>
     </div>
 
     <div class="main">
-        <div class="welcome-screen" id="welcomeScreen">
-            <h1 class="welcome-title">What's on your mind today?</h1>
-            <div class="suggestions">
-                <div class="suggestion-card">Ask about anything</div>
-                <div class="suggestion-card">Sound</div>
-            </div>
-            <div class="auth-section">
-                <p class="auth-text">Get answers tailored specifically for you</p>
-                <p class="auth-subtext">Log in to get answers based on saved conversations, as well as create images and upload files.</p>
-                <button class="login-link" id="showLoginBtn">Log in</button>
-            </div>
+        <div class="welcome" id="welcomeScreen">
+            <h1>What's on your mind today?</h1>
+            <button id="loginBtn">Log in</button>
         </div>
-        <div class="chat-screen" id="chatScreen">
-            <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-area" id="chatScreen">
+            <div class="messages" id="chatMessages"></div>
         </div>
         <div class="input-area">
             <div class="input-box">
-                <input type="text" id="userInput" placeholder="Message TurkiAI..." autocomplete="off">
-                <button class="send-btn" id="sendBtn">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
-                </button>
+                <input type="text" id="userInput" placeholder="Message TurkiAI...">
+                <button id="sendBtn">Send</button>
             </div>
-            <p class="footer-text">TurkiAI can make mistakes. Made by Turki, age 10. Beta version.</p>
+            <p class="footer">TurkiAI can make mistakes. Made by Turki, age 10.</p>
         </div>
     </div>
 
-    <div class="login-modal" id="loginModal">
-        <div class="login-content">
-            <button class="close-modal" id="closeModal">✕</button>
-            <h2>Welcome back</h2>
-            <p class="login-subtitle">Made by Turki, age 10</p>
-            <button class="google-btn" id="googleLoginBtn">
-                <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                Continue with Google
-            </button>
-            <div class="divider"><span>or</span></div>
-            <input type="email" id="emailInput" placeholder="Email address" class="login-inp">
-            <input type="password" id="passwordInput" placeholder="Password" class="login-inp">
-            <button class="continue-btn" id="loginBtn">Continue</button>
-            <p class="signup-text">Don't have an account? <button class="signup-text-btn" id="signupBtn">Sign up</button></p>
+    <div class="login-box" id="loginBox">
+        <div class="login-inner">
+            <h2>Welcome</h2>
+            <p>Made by Turki, age 10</p>
+            <button class="google-btn" id="googleBtn">Sign in with Google</button>
+            <input type="email" id="emailInput" placeholder="Email address">
+            <button id="emailLoginBtn">Continue with Email</button>
+            <button id="closeLoginBtn" style="background:transparent;color:#888;">Cancel</button>
         </div>
     </div>
 
